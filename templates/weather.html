@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Weather App</title>
+  <link rel="icon" type="image/png" sizes="512x512" href="{{ url_for('static', filename='favicon.png') }}">
+
+
+  <!-- Bulma CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+
+  <style>
+    /* small, pleasant custom touches */
+    .hero-weather {
+      background: linear-gradient(135deg,#48c6ef 0%,#6f86d6 100%);
+      color: white;
+    }
+    .search-card { max-width: 640px; margin: 0 auto; }
+    .weather-card { max-width: 540px; margin: 1.25rem auto; }
+    .temp { font-size: 2.25rem; font-weight: 700; }
+    .muted { color: #6b6b6b; }
+  </style>
+</head>
+<body>
+
+  <!-- HERO / Header -->
+  <section class="hero is-medium hero-weather">
+    <div class="hero-body">
+      <div class="container has-text-centered">
+        <h1 class="title is-2">What's the weather like?</h1>
+        <h2 class="subtitle is-5">Quickly check the current weather for any city</h2>
+      </div>
+    </div>
+  </section>
+
+  <!-- Search form -->
+  <section class="section">
+    <div class="container">
+      <div class="card search-card">
+        <div class="card-content">
+          <form action="{{ url_for('index') }}" method="post">
+            <!-- If you use Flask-WTF, include the CSRF token here -->
+            <div class="field has-addons">
+              <div class="control is-expanded">
+                <input name="city" class="input" type="text" placeholder="Enter city name (e.g. London)" value="{{ request.form.city if request.form.city else '' }}" aria-label="City name">
+              </div>
+              <div class="control">
+                <button type="submit" class="button is-info">Check</button>
+              </div>
+            </div>
+            {% if error %}
+            <p class="help is-danger">{{ error }}</p>
+            {% endif %}
+          </form>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Weather result -->
+  <section class="section">
+    <div class="container">
+
+      {% if weather %}
+      <div class="card weather-card">
+        <div class="card-content">
+          <article class="media">
+            <div class="media-left">
+              <figure class="image is-96x96">
+                <!-- weather icon provided by your weather API -->
+                <img src="{{ weather.icon_url }}" alt="weather icon">
+              </figure>
+            </div>
+            <div class="media-content">
+              <div class="content">
+                <p>
+                  <strong class="is-size-4">{{ weather.city }}, {{ weather.country }}</strong>
+                  <br>
+                  <span class="temp">{{ weather.temperature }}°{{ weather.unit }}</span>
+                  <br>
+                  <span class="muted">{{ weather.description | capitalize }}</span>
+                </p>
+              </div>
+
+              <div class="columns is-mobile is-multiline">
+                <div class="column is-half">
+                  <p class="muted">Humidity</p>
+                  <p>{{ weather.humidity }}%</p>
+                </div>
+                <div class="column is-half">
+                  <p class="muted">Wind</p>
+                  <p>{{ weather.wind_speed }} {{ weather.wind_unit }}</p>
+                </div>
+                <div class="column is-half">
+                  <p class="muted">Pressure</p>
+                  <p>{{ weather.pressure }} hPa</p>
+                </div>
+                <div class="column is-half">
+                  <p class="muted">Local time</p>
+                  <p>{{ weather.local_time }}</p>
+                </div>
+              </div>
+
+            </div>
+          </article>
+        </div>
+      </div>
+      {% else %}
+      <div class="has-text-centered muted">
+        <p>Type a city name and press <strong>Check</strong> to see the weather.</p>
+      </div>
+      {% endif %}
+
+    </div>
+  </section>
+
+  <!-- Optional: Saved cities / history -->
+  {% if saved_cities %}
+  <section class="section">
+    <div class="container">
+      <h3 class="title is-5">Saved Cities</h3>
+      <div class="buttons">
+        {% for c in saved_cities %}
+          <a href="{{ url_for('index') }}?city={{ c }}" class="button is-light">{{ c }}</a>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+  {% endif %}
+
+</body>
+</html>
